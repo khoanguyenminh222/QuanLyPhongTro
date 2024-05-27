@@ -13,6 +13,8 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
     const [electricityRate, setElectricityRate] = useState('');
     const [waterRate, setWaterRate] = useState('');
     const [otherCosts, setOtherCosts] = useState([]);
+    const [electricity, setElectricity] = useState('');
+    const [water, setWater] = useState('');
 
     useEffect(() => {
         if (initialData) {
@@ -21,6 +23,8 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
             setElectricityRate(initialData.electricityRate || '');
             setWaterRate(initialData.waterRate || '');
             setOtherCosts(initialData.otherCosts || []);
+            setElectricity(initialData.electricity || '');
+            setWater(initialData.water || '');
         }
     }, [initialData]);
 
@@ -41,7 +45,7 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
 
     const handleSubmit = () => {
         // Check if any required field is empty
-        if (!name || !rent || !electricityRate || !waterRate) {
+        if (!name || !rent || !electricityRate || !waterRate || !electricity || !water) {
             toast.warning("Yêu cầu điền đầy đủ thông tin");
             return;
         }
@@ -53,7 +57,7 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
                 return;
             }
         }
-        onSave({ name, rent, electricityRate, waterRate, otherCosts });
+        onSave({ name, rent, electricityRate, waterRate, otherCosts, electricity, water });
     };
 
     return (
@@ -72,7 +76,6 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required={true}
                 />
             </div>
             <div className="mb-4">
@@ -82,7 +85,6 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
                     value={rent}
                     onChange={(e) => setRent(e.target.value)}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
                 />
             </div>
             <div className="mb-4">
@@ -92,7 +94,6 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
                     value={electricityRate}
                     onChange={(e) => setElectricityRate(e.target.value)}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
                 />
             </div>
             <div className="mb-4">
@@ -102,7 +103,24 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
                     value={waterRate}
                     onChange={(e) => setWaterRate(e.target.value)}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
+                />
+            </div>
+            <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">Số điện - trên đồng hồ điện</label>
+                <input
+                    type="number"
+                    value={electricity}
+                    onChange={(e) => setElectricity(e.target.value)}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+            </div>
+            <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">Số nước - trên đồng hồ nước</label>
+                <input
+                    type="number"
+                    value={water}
+                    onChange={(e) => setWater(e.target.value)}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
             </div>
             <div className="mb-4">
@@ -115,7 +133,6 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
                             value={cost.description}
                             onChange={(e) => handleCostChange(index, 'description', e.target.value)}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
-                            required
                         />
                         <input
                             type="number"
@@ -123,7 +140,6 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
                             value={cost.amount}
                             onChange={(e) => handleCostChange(index, 'amount', e.target.value)}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
-                            required
                         />
                         <button
                             onClick={() => handleRemoveCost(index)}

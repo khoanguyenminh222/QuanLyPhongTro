@@ -2,7 +2,13 @@ import mongoose from 'mongoose';
 
 const BillSchema = new mongoose.Schema({
   roomId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Room',
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
   month: {

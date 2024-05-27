@@ -17,21 +17,23 @@ function RoomCard({ room, onEdit, onDelete, onEditStatus }) {
       <p className="mb-2">Tiền phòng: <span className="font-bold text-green-800">{formatNumber(room.rent).toLocaleString()} VND</span></p>
       <p className="mb-2">Tiền điện: <span className="font-bold text-blue-800">{formatNumber(room.electricityRate).toLocaleString()} VND/kWh</span></p>
       <p className="mb-2">Tiền nước: <span className="font-bold text-purple-800">{formatNumber(room.waterRate).toLocaleString()} VND/m³</span></p>
+      <p className="mb-2">Số điện hiện tại: {formatNumber(room.electricity).toLocaleString()} kWh</p>
+      <p className="mb-2">Số nước hiện tại: {formatNumber(room.water).toLocaleString()} m³</p>
       {Array.isArray(room.otherCosts) && room.otherCosts.length>0 && (
         <div className="mb-2">
           <h3 className="text-lg font-semibold text-red-700">Chi phí khác:</h3>
           <ul className="list-disc list-inside text-red-800">
             {room.otherCosts.map((cost, index) => (
-              <li key={index}>{cost.description}: <span className="font-bold">{formatNumber(cost.amount).toLocaleString()} VND</span></li>
+              <li className='capitalize' key={index}>{cost.description}: <span className="font-bold">{formatNumber(cost.amount).toLocaleString()} VND</span></li>
             ))}
           </ul>
         </div>
       )}
       <div className="flex space-x-4 mb-4">
-        <Link href={`/bills/${room.id}`} legacyBehavior>
+        <Link href={`/bills/${room._id}`} legacyBehavior>
           <a className="text-blue-500 hover:underline">Tạo Hóa đơn</a>
         </Link>
-        <Link href={`/history/${room.id}`} legacyBehavior>
+        <Link href={`/history/${room._id}`} legacyBehavior>
           <a className="text-blue-500 hover:underline">Lịch sử</a>
         </Link>
       </div>

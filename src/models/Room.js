@@ -29,6 +29,19 @@ const RoomSchema = new mongoose.Schema({
       amount: Number,
     },
   ],
+  electricity: {
+    type: Number,
+    required: true,
+  },
+  water:{
+    type: Number,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

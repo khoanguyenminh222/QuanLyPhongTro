@@ -7,29 +7,47 @@ import 'react-toastify/dist/ReactToastify.css';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import axios from 'axios';
+import { getServerSideProps } from '@/helpers/cookieHelper';
+import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 
-function index() {
+function index({ token }) {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [roomList, setRoomList] = useState([]);
     const [editingRoom, setEditingRoom] = useState(null);
+    const [userId, setUserId] = useState(undefined);
+
+    useEffect(() => {
+        if (token) {
+
+            const useridfromtoken = getUserIdFromToken(token);
+            if (useridfromtoken) {
+                setUserId(useridfromtoken);
+            }
+        }
+    }, [token])
 
     const fetchRooms = async () => {
-        const response = await axios.get(`/api/rooms`);
-        setRoomList(response.data)
+        if(userId){
+            const response = await axios.get(`/api/rooms?userId=${userId}`,{
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setRoomList(response.data)
+        }
     };
     useEffect(() => {
         fetchRooms();
-    }, [])
+    }, [userId]);
 
     const handleSave = async (roomData) => {
         if (editingRoom) {
             // Call API to update room in database
             try {
-                const response = await axios.put(`/api/rooms/${editingRoom._id}`, roomData);
+                const response = await axios.put(`/api/rooms/${editingRoom._id}?userId=${userId}`, roomData, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 if (response.status >= 200 && response.status < 300) {
                     toast.success(response.data.message)
-                    const updatedRoomList = roomList.map(room => room._id === editingRoom._id ? { ...room, ...roomData } : room);
-                    setRoomList(updatedRoomList);
+                    fetchRooms();
                 } else {
                     toast.error(response.data.message)
                 }
@@ -44,7 +62,9 @@ function index() {
         } else {
             // Call API to save room in database
             try {
-                const response = await axios.post('/api/rooms', roomData)
+                const response = await axios.post(`/api/rooms?userId=${userId}`, roomData, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
                 if (response.status >= 200 && response.status < 300) {
                     toast.success(response.data.message)
                     fetchRooms();
@@ -79,7 +99,9 @@ function index() {
                     onClick: async () => {
                         // Call API to delete room from database
                         try {
-                            const response = await axios.delete(`/api/rooms/${roomId}`);
+                            const response = await axios.delete(`/api/rooms/${roomId}?userId=${userId}`,{
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
                             if (response.status >= 200 && response.status < 300) {
                                 toast.success(response.data.message)
                                 fetchRooms();
@@ -105,7 +127,9 @@ function index() {
 
     const handleEditStatus = async (room) => {
         try {
-            const response = await axios.put(`/api/rooms/${room._id}`, {status: !room.status});
+            const response = await axios.put(`/api/rooms/${room._id}`, { status: !room.status },{
+                headers: { Authorization: `Bearer ${token}` }
+            });
             if (response.status >= 200 && response.status < 300) {
                 toast.success(response.data.message)
                 fetchRooms();
@@ -123,7 +147,7 @@ function index() {
 
     return (
         <>
-            <Header />
+            <Header token={token}/>
             <div className="container mx-auto px-4">
                 <h1 className="text-3xl font-bold mt-8 mb-4">Danh sách Phòng trọ</h1>
                 <button
@@ -133,7 +157,7 @@ function index() {
                     Tạo mới Phòng
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {roomList.map((room,index) => (
+                    {roomList.map((room, index) => (
                         <RoomCard
                             key={index}
                             room={room}
@@ -158,4 +182,5 @@ function index() {
     );
 }
 
+export { getServerSideProps };
 export default index
