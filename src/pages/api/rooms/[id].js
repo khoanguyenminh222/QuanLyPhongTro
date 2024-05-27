@@ -1,5 +1,6 @@
 import connectToDatabase from '../../../lib/db';
 import Room from '../../../models/Room';
+import { authenticate } from '../../../lib/authMiddleware';
 
 export default async function handler(req, res) {
   await connectToDatabase();
@@ -21,7 +22,6 @@ export default async function handler(req, res) {
       }
     } else if (req.method === 'PUT') {
       let { name, rent, electricityRate, waterRate, otherCosts, status, electricity, water } = req.body;
-
       try {
         let updatedRoom;
         const room = await Room.findOne({ _id: id, userId: userId });

@@ -5,8 +5,9 @@ import Link from 'next/link';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getServerSideProps } from '@/helpers/cookieHelper';
 
-function BillPage() {
+function BillPage({ token }) {
   const router = useRouter();
   const { roomId } = router.query;
   const [room, setRoom] = useState([])
@@ -89,7 +90,7 @@ function BillPage() {
 
   return (
     <>
-      <Header />
+      <Header token={token}/>
       <div className="container mx-auto px-4 py-3 mt-4 mb-4 bg-white">
         <Link href="/rooms" legacyBehavior>
           <a className="text-blue-500 hover:underline">Quay lại</a>
@@ -178,4 +179,5 @@ function BillPage() {
   );
 }
 
+export { getServerSideProps };
 export default BillPage

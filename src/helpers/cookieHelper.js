@@ -11,7 +11,6 @@ export async function getServerSideProps(context) {
       };
     }
     const token = cookies.token;
-    console.log(token)
     return {
       props: {
         token: token || null,

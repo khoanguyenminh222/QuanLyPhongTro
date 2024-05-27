@@ -2,6 +2,12 @@ import connectToDatabase from '../../../lib/db';
 import Room from '../../../models/Room';
 import { authenticate } from '../../../lib/authMiddleware';
 
+export const config = {
+  api: {
+    externalResolver: true,
+  },
+};
+
 export default async function handler(req, res) {
   await connectToDatabase();
 

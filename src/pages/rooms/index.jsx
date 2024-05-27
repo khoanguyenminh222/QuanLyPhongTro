@@ -81,7 +81,7 @@ function index({ token }) {
 
         }
         setModalIsOpen(false);
-        setEditingRoom(null);
+        setEditingRoom({});
     };
 
     const handleEdit = (room) => {
@@ -127,7 +127,7 @@ function index({ token }) {
 
     const handleEditStatus = async (room) => {
         try {
-            const response = await axios.put(`/api/rooms/${room._id}`, { status: !room.status },{
+            const response = await axios.put(`/api/rooms/${room._id}?userId=${userId}`, { status: !room.status },{
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status >= 200 && response.status < 300) {
