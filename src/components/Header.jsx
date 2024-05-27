@@ -24,7 +24,7 @@ function Header({ token }) {
     useEffect(() => {
         if(userId){
             const fetchUser = async () => {
-                const response = await axios.get(`api/users/${userId}`,{
+                const response = await axios.get(`../api/users/${userId}`,{
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 setUser(response.data)
@@ -72,7 +72,7 @@ function Header({ token }) {
                         </li>
                         <li>
                             <Link href="/utilities" legacyBehavior>
-                                <a className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Thiết lập Tiền điện, Tiền nước</a>
+                                <a className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Thiết lập số điện, nước tối đa</a>
                             </Link>
                         </li>
                     </ul>

@@ -8,41 +8,28 @@ import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import axios from 'axios';
 import { getServerSideProps } from '@/helpers/cookieHelper';
-import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 
 function index({ token }) {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [roomList, setRoomList] = useState([]);
     const [editingRoom, setEditingRoom] = useState(null);
-    const [userId, setUserId] = useState(undefined);
-
-    useEffect(() => {
-        if (token) {
-
-            const useridfromtoken = getUserIdFromToken(token);
-            if (useridfromtoken) {
-                setUserId(useridfromtoken);
-            }
-        }
-    }, [token])
 
     const fetchRooms = async () => {
-        if(userId){
-            const response = await axios.get(`/api/rooms?userId=${userId}`,{
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setRoomList(response.data)
-        }
+        const response = await axios.get(`/api/rooms`,{
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        setRoomList(response.data)
     };
     useEffect(() => {
         fetchRooms();
-    }, [userId]);
+    }, []);
 
     const handleSave = async (roomData) => {
+        console.log("edit",editingRoom)
         if (editingRoom) {
             // Call API to update room in database
             try {
-                const response = await axios.put(`/api/rooms/${editingRoom._id}?userId=${userId}`, roomData, {
+                const response = await axios.put(`/api/rooms/${editingRoom._id}`, roomData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (response.status >= 200 && response.status < 300) {
@@ -62,7 +49,7 @@ function index({ token }) {
         } else {
             // Call API to save room in database
             try {
-                const response = await axios.post(`/api/rooms?userId=${userId}`, roomData, {
+                const response = await axios.post(`/api/rooms`, roomData, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 if (response.status >= 200 && response.status < 300) {
@@ -81,7 +68,7 @@ function index({ token }) {
 
         }
         setModalIsOpen(false);
-        setEditingRoom({});
+        setEditingRoom(null);
     };
 
     const handleEdit = (room) => {
@@ -99,7 +86,7 @@ function index({ token }) {
                     onClick: async () => {
                         // Call API to delete room from database
                         try {
-                            const response = await axios.delete(`/api/rooms/${roomId}?userId=${userId}`,{
+                            const response = await axios.delete(`/api/rooms/${roomId}`,{
                                 headers: { Authorization: `Bearer ${token}` }
                             });
                             if (response.status >= 200 && response.status < 300) {
@@ -127,7 +114,7 @@ function index({ token }) {
 
     const handleEditStatus = async (room) => {
         try {
-            const response = await axios.put(`/api/rooms/${room._id}?userId=${userId}`, { status: !room.status },{
+            const response = await axios.put(`/api/rooms/${room._id}`, { status: !room.status },{
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status >= 200 && response.status < 300) {

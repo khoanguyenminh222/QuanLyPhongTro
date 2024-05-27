@@ -16,6 +16,8 @@ function BillPage({ token }) {
   const [showModal, setShowModal] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [totalAmount, setTotalAmount] = useState(0);
+  const [maxElectricity, setMaxElectricity] = useState(9999);
+  const [maxWater, setMaxWater] = useState(9999);
 
   const formatNumber = (number) => {
     return new Intl.NumberFormat('vi-VN').format(number);
@@ -26,13 +28,28 @@ function BillPage({ token }) {
       router.push('/rooms'); // Chuyển hướng người dùng đến trang danh sách phòng
     } else {
       const fetchRoom = async () => {
-        const response = await axios.get(`/api/rooms/${roomId}`);
+        const response = await axios.get(`/api/rooms/${roomId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         setRoom(response.data)
       };
       fetchRoom();
       setCurrentDate(getCurrentDate());
+
+      const fetchConfig = async () => {
+        const response = await axios.get('/api/config', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setMaxElectricity(response.data.maxElectricity);
+        setMaxWater(response.data.maxWater);
+      };
+      fetchConfig();
     }
-  }, [roomId])
+  }, [roomId, token])
 
   const getCurrentDate = () => {
     const date = new Date();
@@ -46,21 +63,44 @@ function BillPage({ token }) {
   const [waterCost, setWaterCost] = useState('');
   const [otherCostsTotal, setOtherCostsTotal] = useState('');
 
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
     if (!electricityCurrent || !waterCurrent) {
       toast.warning("Yêu cầu điền đủ thông tin");
       return;
     }
-    setElectricityCost((electricityCurrent - room.electricity) * room.electricityRate);
-    setWaterCost((waterCurrent - room.water) * room.waterRate);
-    setOtherCostsTotal(room.otherCosts.reduce((total, cost) => total + cost.amount, 0));
-    setTotalAmount(electricityCost + waterCost + otherCostsTotal + room.rent)
+
+    let electricityUsage;
+    if (electricityCurrent < room.electricity) {
+      // Trường hợp đồng hồ điện quay về 0
+      electricityUsage = (maxElectricity - room.electricity) + parseInt(electricityCurrent);
+      console.log("ele", electricityUsage)
+    } else {
+      electricityUsage = electricityCurrent - room.electricity;
+    }
+
+    let waterUsage;
+    if (waterCurrent < room.water) {
+      // Trường hợp đồng hồ nước quay về 0
+      waterUsage = (maxWater - room.water) + parseInt(waterCurrent);
+      console.log("water", waterUsage)
+    } else {
+      waterUsage = waterCurrent - room.water;
+    }
+    const calculatedElectricityCost = electricityUsage * room.electricityRate;
+    const calculatedWaterCost = waterUsage * room.waterRate;
+    const calculatedOtherCostsTotal = room.otherCosts.reduce((total, cost) => total + cost.amount, 0);
+    const calculatedTotalAmount = calculatedElectricityCost + calculatedWaterCost + calculatedOtherCostsTotal + room.rent;
+
+    setElectricityCost(calculatedElectricityCost);
+    setWaterCost(calculatedWaterCost);
+    setOtherCostsTotal(calculatedOtherCostsTotal);
+    setTotalAmount(calculatedTotalAmount);
     setShowModal(true);
   };
 
   const handleSaveBill = async () => {
     try {
-      const response = await axios.post('/api/savebill', {
+      const response = await axios.post('/api/bills', {
         roomId: roomId,
         month: currentDate,
         previousElectricity: room.electricity,
@@ -90,7 +130,7 @@ function BillPage({ token }) {
 
   return (
     <>
-      <Header token={token}/>
+      <Header token={token} />
       <div className="container mx-auto px-4 py-3 mt-4 mb-4 bg-white">
         <Link href="/rooms" legacyBehavior>
           <a className="text-blue-500 hover:underline">Quay lại</a>
@@ -140,8 +180,16 @@ function BillPage({ token }) {
               />
             </div>
             <div className="mb-4">
-              <p>Điện: ({formatNumber(electricityCurrent)} - {formatNumber(room.electricity)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
-              <p>Nước: ({formatNumber(waterCurrent)} - {formatNumber(room.water)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+              {electricityCurrent < room.electricity ?
+                <p>Điện: ({formatNumber(maxElectricity)} - {formatNumber(room.electricity)} + 1 + {formatNumber(electricityCurrent)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
+                :
+                <p>Điện: ({formatNumber(electricityCurrent)} - {formatNumber(room.electricity)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
+              }
+              {waterCurrent < room.water ?
+                <p>Nước: ({formatNumber(maxWater)} - {formatNumber(room.water)} + 1 + {formatNumber(waterCurrent)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+                :
+                <p>Nước: ({formatNumber(waterCurrent)} - {formatNumber(room.water)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+              }
               {Array.isArray(room.otherCosts) && room.otherCosts.length > 0 && (
                 <div className="mb-2">
                   <h3 className="font-semibold text-red-700">Chi phí khác:</h3>

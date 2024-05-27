@@ -2,12 +2,18 @@ import connectToDatabase from '../../../lib/db';
 import Room from '../../../models/Room';
 import { authenticate } from '../../../lib/authMiddleware';
 
+export const config = {
+  api: {
+    externalResolver: true,
+  },
+};
+
 export default async function handler(req, res) {
   await connectToDatabase();
 
   authenticate(req, res, async () => {
-    const { id, userId } = req.query;
-
+    const { id } = req.query;
+    const userId = req.user;
     if (!userId) {
       return res.status(400).json({ message: 'Thiếu thông tin userId' });
     }

@@ -1,13 +1,19 @@
 import connectToDatabase from '../../lib/db';
 import Bill from '../../models/Bill';
 
+export const config = {
+  api: {
+      externalResolver: true,
+  },
+};
+
 export default async function handler(req, res) {
   await connectToDatabase();
   authenticate(req, res, async () => {
+    const userId = req.user
     if (req.method === 'POST') {
       const {
         roomId,
-        userId,
         month,
         previousElectricity,
         currentElectricity,

@@ -2,12 +2,17 @@ import connectToDatabase from '../../../lib/db';
 import User from '../../../models/User';
 import { authenticate } from '../../../lib/authMiddleware';
 
+export const config = {
+    api: {
+        externalResolver: true,
+    },
+};
+
 export default async function handler(req, res) {
     await connectToDatabase();
     authenticate(req, res, async () => {
         if (req.method === 'GET') {
             const { id } = req.query;
-
             if (!id) {
                 return res.status(400).json({ message: 'Thiếu thông tin userId' });
             }

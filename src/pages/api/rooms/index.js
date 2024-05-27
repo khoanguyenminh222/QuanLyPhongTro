@@ -13,8 +13,7 @@ export default async function handler(req, res) {
 
   authenticate(req, res, async () => {
     if (req.method === 'GET') {
-      const { userId } = req.query;
-
+      const userId = req.user;
       if (!userId) {
         return res.status(400).json({ message: 'Thiếu thông tin userId' });
       }
@@ -26,7 +25,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ message: error.message });
       }
     } else if (req.method === 'POST') {
-      const { userId } = req.query;
+      const userId = req.user;
 
       let { name, rent, electricityRate, waterRate, otherCosts, electricity, water } = req.body;
       
