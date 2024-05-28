@@ -2,6 +2,7 @@ import connectToDatabase from '../../../lib/db';
 import Bill from '../../../models/Bill';
 import { authenticate } from '../../../lib/authMiddleware';
 import Config from '@/models/Config';
+import Room from '@/models/Room';
 
 export const config = {
   api: {
@@ -71,6 +72,13 @@ export default async function handler(req, res) {
         });
 
         const savedBill = await newBill.save();
+
+        // Cập nhật giá trị electricity và water của phòng
+        await Room.findByIdAndUpdate(roomId, {
+          electricity: currentElectricity,
+          water: currentWater,
+        });
+
         return res.status(201).json({ message: 'Tạo mới thành công', savedBill });
       } catch (error) {
         return res.status(500).json({ message: error.message });

@@ -37,6 +37,9 @@ function RoomCard({ user, room, onEdit, onDelete, onEditStatus }) {
         <Link href={`/history/${room._id}`} legacyBehavior>
           <a className="text-blue-500 hover:underline">Lịch sử</a>
         </Link>
+        <Link href={`/tenants/${room._id}`} legacyBehavior>
+          <a className="text-blue-500 hover:underline">Quản lý Người ở</a>
+        </Link>
       </div>
       <div className="flex space-x-4">
         <button
