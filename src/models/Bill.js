@@ -41,8 +41,8 @@ const BillSchema = new mongoose.Schema({
   },
   otherCosts: [
     {
+      description: String,
       amount: Number,
-      note: String,
     },
   ],
   rent: {

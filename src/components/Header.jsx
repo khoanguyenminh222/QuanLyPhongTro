@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 function Header({ token }) {
+    const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const toggleNavbar = () => {
         setIsOpen(!isOpen);
@@ -33,8 +36,14 @@ function Header({ token }) {
         }
     },[userId])
 
+    const handleLogout = () => {
+        // Xử lý đăng xuất ở đây, có thể làm gì đó như xóa token khỏi cookie, state, vv.
+        Cookies.remove('token');
+        router.push('/login');
+    };
+
     return (
-        <nav className="bg-white border-gray-200 dark:bg-gray-900">
+        <nav className="bg-white border-gray-200 dark:bg-gray-900 sticky top-0 z-10 shadow-2xl">
             <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
                 <Link href="/rooms" legacyBehavior>
                     <a className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -56,24 +65,12 @@ function Header({ token }) {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/history" legacyBehavior>
-                                <a className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Lịch sử</a>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/about" legacyBehavior>
-                                <a className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Giới thiệu</a>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/contact" legacyBehavior>
-                                <a className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Liên hệ</a>
-                            </Link>
-                        </li>
-                        <li>
                             <Link href="/utilities" legacyBehavior>
                                 <a className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Thiết lập số điện, nước tối đa</a>
                             </Link>
+                        </li>
+                        <li>
+                            <button onClick={handleLogout} className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent focus:outline-none">Đăng xuất</button>
                         </li>
                     </ul>
                 </div>

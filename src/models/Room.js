@@ -4,7 +4,6 @@ const RoomSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   status:{
     type: Boolean, //false là đang trống, true là đang thuê
@@ -47,5 +46,6 @@ const RoomSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+RoomSchema.index({ name: 1, userId: 1 }, { unique: true });
 
 export default mongoose.models.Room || mongoose.model('Room', RoomSchema);

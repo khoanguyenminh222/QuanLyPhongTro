@@ -5,6 +5,8 @@ import Link from 'next/link';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFile } from '@fortawesome/free-solid-svg-icons';
 import { getServerSideProps } from '@/helpers/cookieHelper';
 
 function BillPage({ token }) {
@@ -18,6 +20,7 @@ function BillPage({ token }) {
   const [totalAmount, setTotalAmount] = useState(0);
   const [maxElectricity, setMaxElectricity] = useState(9999);
   const [maxWater, setMaxWater] = useState(9999);
+  const [viewHistory, setViewHistory] = useState(false);
 
   const formatNumber = (number) => {
     return new Intl.NumberFormat('vi-VN').format(number);
@@ -72,8 +75,7 @@ function BillPage({ token }) {
     let electricityUsage;
     if (electricityCurrent < room.electricity) {
       // Trường hợp đồng hồ điện quay về 0
-      electricityUsage = (maxElectricity - room.electricity) + parseInt(electricityCurrent);
-      console.log("ele", electricityUsage)
+      electricityUsage = (maxElectricity - room.electricity + 1) + parseInt(electricityCurrent);
     } else {
       electricityUsage = electricityCurrent - room.electricity;
     }
@@ -81,8 +83,7 @@ function BillPage({ token }) {
     let waterUsage;
     if (waterCurrent < room.water) {
       // Trường hợp đồng hồ nước quay về 0
-      waterUsage = (maxWater - room.water) + parseInt(waterCurrent);
-      console.log("water", waterUsage)
+      waterUsage = (maxWater - room.water + 1) + parseInt(waterCurrent);
     } else {
       waterUsage = waterCurrent - room.water;
     }
@@ -111,10 +112,15 @@ function BillPage({ token }) {
         waterRate: room.waterRate,
         otherCosts: room.otherCosts,
         rent: room.rent,
+      },{
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       if (response.status >= 200 && response.status < 300) {
         toast.success(response.data.message);
+        setViewHistory(true);
         //setShowModal(false);
       } else {
         toast.error(response.data.message);
@@ -131,97 +137,105 @@ function BillPage({ token }) {
   return (
     <>
       <Header token={token} />
-      <div className="container mx-auto px-4 py-3 mt-4 mb-4 bg-white">
-        <Link href="/rooms" legacyBehavior>
-          <a className="text-blue-500 hover:underline">Quay lại</a>
-        </Link>
-        <h1 className="text-3xl font-bold mt-8 mb-4">Tạo Hóa đơn cho Phòng #{room.name}</h1>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="electricity">Số điện (kWh) - trên đồng hồ điện</label>
-          <input
-            type="number"
-            id="electricity"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={electricityCurrent}
-            onChange={(e) => setElectricityCurrent(e.target.value)}
-          />
+      <div className="container w-full flex justify-center items-center mx-auto px-3 relative">
+        <div className='bg-white mx-auto px-4 py-3 my-4 rounded-md shadow-xl'>
+          <Link href="/rooms" legacyBehavior>
+            <a className="text-blue-500 hover:underline">Quay lại</a>
+          </Link>
+          <h1 className="text-3xl font-bold mt-8 mb-4">Tạo Hóa đơn cho Phòng #{room.name}</h1>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="electricity">Số điện (kWh) - trên đồng hồ điện</label>
+            <input
+              type="number"
+              id="electricity"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              value={electricityCurrent}
+              onChange={(e) => setElectricityCurrent(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="water">Số nước (m³) - trên đồng hồ nước</label>
+            <input
+              type="number"
+              id="water"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              value={waterCurrent}
+              onChange={(e) => setWaterCurrent(e.target.value)}
+            />
+          </div>
+          <button
+            onClick={handleCalculate}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Tính Toán
+          </button>
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="water">Số nước (m³) - trên đồng hồ nước</label>
-          <input
-            type="number"
-            id="water"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={waterCurrent}
-            onChange={(e) => setWaterCurrent(e.target.value)}
-          />
-        </div>
-        <button
-          onClick={handleCalculate}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Tính Toán
-        </button>
+
+        {/* Modal bill */}
+        {showModal && (
+          <div className="fixed z-20 top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-8 rounded-lg">
+              <h2 className="text-2xl font-bold mb-4">Thông tin tính toán</h2>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="month">Tháng:</label>
+                <input
+                  type="text"
+                  id="month"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  disabled
+                  value={currentDate}
+                />
+              </div>
+              <div className="mb-4">
+                {electricityCurrent < room.electricity ?
+                  <p>Điện: ({formatNumber(maxElectricity)} - {formatNumber(room.electricity)} + 1 + {formatNumber(electricityCurrent)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
+                  :
+                  <p>Điện: ({formatNumber(electricityCurrent)} - {formatNumber(room.electricity)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
+                }
+                {waterCurrent < room.water ?
+                  <p>Nước: ({formatNumber(maxWater)} - {formatNumber(room.water)} + 1 + {formatNumber(waterCurrent)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+                  :
+                  <p>Nước: ({formatNumber(waterCurrent)} - {formatNumber(room.water)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+                }
+                {Array.isArray(room.otherCosts) && room.otherCosts.length > 0 && (
+                  <div className="mb-2">
+                    <h3 className="font-semibold">Chi phí khác:</h3>
+                    <ul className="list-disc list-inside">
+                      {room.otherCosts.map((cost, index) => (
+                        <li key={index}>{cost.description}: <span>{formatNumber(cost.amount).toLocaleString()} đ</span></li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <p>Tổng chi phí khác: {formatNumber(otherCostsTotal)} đ</p>
+                <p>Tiền nhà: {formatNumber(room.rent)} đ</p>
+                <p className='font-bold text-2xl mt-4 text-red-700'>Thành tiền: {formatNumber(totalAmount)} đ</p>
+              </div>
+              <div className='grid grid-cols-2 mb-3'>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="border border-gray-200 bg-white-500 hover:bg-gray-300 text-black font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full mr-1"
+                >
+                  Đóng
+                </button>
+                <button
+                  onClick={() => handleSaveBill()}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full ml-1"
+                >
+                  Lưu
+                </button>
+              </div>
+              {viewHistory &&
+                <Link href={`/history/${roomId}`} legacyBehavior>
+                  <a className="text-blue-500 hover:underline"><FontAwesomeIcon icon={faFile} /> Xem lịch sử</a>
+                </Link>
+              }
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Modal bill */}
-      {showModal && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg w-96">
-            <h2 className="text-2xl font-bold mb-4">Thông tin tính toán</h2>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="month">Tháng:</label>
-              <input
-                type="text"
-                id="month"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                disabled
-                value={currentDate}
-              />
-            </div>
-            <div className="mb-4">
-              {electricityCurrent < room.electricity ?
-                <p>Điện: ({formatNumber(maxElectricity)} - {formatNumber(room.electricity)} + 1 + {formatNumber(electricityCurrent)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
-                :
-                <p>Điện: ({formatNumber(electricityCurrent)} - {formatNumber(room.electricity)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
-              }
-              {waterCurrent < room.water ?
-                <p>Nước: ({formatNumber(maxWater)} - {formatNumber(room.water)} + 1 + {formatNumber(waterCurrent)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
-                :
-                <p>Nước: ({formatNumber(waterCurrent)} - {formatNumber(room.water)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
-              }
-              {Array.isArray(room.otherCosts) && room.otherCosts.length > 0 && (
-                <div className="mb-2">
-                  <h3 className="font-semibold text-red-700">Chi phí khác:</h3>
-                  <ul className="list-disc list-inside text-red-800">
-                    {room.otherCosts.map((cost, index) => (
-                      <li key={index}>{cost.description}: <span>{formatNumber(cost.amount).toLocaleString()} đ</span></li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <p>Tổng chi phí khác: {formatNumber(otherCostsTotal)} đ</p>
-              <p>Tiền nhà: {formatNumber(room.rent)} đ</p>
-              <p className='font-bold text-2xl'>Thành tiền: {formatNumber(totalAmount)} đ</p>
-            </div>
-            <div className='grid grid-cols-2'>
-              <button
-                onClick={() => setShowModal(false)}
-                className="border border-gray-200 bg-white-500 hover:bg-gray-300 text-black font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full mr-1"
-              >
-                Đóng
-              </button>
-              <button
-                onClick={() => handleSaveBill()}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full ml-1"
-              >
-                Lưu
-              </button>
-            </div>
 
-          </div>
-        </div>
-      )}
       <ToastContainer />
     </>
   );

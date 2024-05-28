@@ -1,9 +1,11 @@
-import connectToDatabase from '../../lib/db';
-import Bill from '../../models/Bill';
+import connectToDatabase from '../../../lib/db';
+import Bill from '../../../models/Bill';
+import { authenticate } from '../../../lib/authMiddleware';
+import Config from '@/models/Config';
 
 export const config = {
   api: {
-      externalResolver: true,
+    externalResolver: true,
   },
 };
 
@@ -32,8 +34,23 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Yêu cầu điền đủ thông tin' });
       }
 
-      const totalElectricityCost = (currentElectricity - previousElectricity) * electricityRate;
-      const totalWaterCost = (currentWater - previousWater) * waterRate;
+      const config = await Config.findOne({ userId });
+
+      let electricUsage;
+      if (currentElectricity < previousElectricity) {
+        electricUsage = (config.maxElectricity - previousElectricity + 1) + parseInt(currentElectricity);
+      } else {
+        electricUsage = currentElectricity - previousElectricity;
+      }
+
+      let waterUsage;
+      if (currentWater < previousWater) {
+        waterUsage = (config.maxWater - previousWater + 1) + parseInt(currentWater);
+      } else {
+        waterUsage = currentWater - previousWater;
+      }
+      const totalElectricityCost = electricUsage * electricityRate;
+      const totalWaterCost = waterUsage * waterRate;
       const totalOtherCosts = otherCosts.reduce((acc, cost) => acc + cost.amount, 0);
       const total = totalElectricityCost + totalWaterCost + totalOtherCosts + rent;
 
@@ -59,13 +76,27 @@ export default async function handler(req, res) {
         return res.status(500).json({ message: error.message });
       }
     } else if (req.method === 'GET') {
-      const { userId } = req.query;
+      const userId = req.user;
+      const { roomId, year } = req.query;
 
       if (!userId) {
         return res.status(400).json({ message: 'Thiếu thông tin userId' });
       }
+
+      if (!roomId) {
+        return res.status(400).json({ message: 'Thiếu thông tin roomId' });
+      }
+
+
       try {
-        const bills = await Bill.find({ userId });
+        let bills;
+
+        if (year) {
+          const yearFilter = { month: { $regex: `-${year}$` } };
+          bills = await Bill.find({ userId, roomId, ...yearFilter }).sort({ createdAt: 'desc' });
+        } else {
+          bills = await Bill.find({ userId, roomId }).sort({ createdAt: 'desc' });
+        }
         return res.status(200).json(bills);
       } catch (error) {
         return res.status(500).json({ message: error.message });
