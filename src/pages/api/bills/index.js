@@ -77,6 +77,7 @@ export default async function handler(req, res) {
       }
     } else if (req.method === 'GET') {
       const userId = req.user;
+      const userRole = req.userRole;
       const { roomId, year } = req.query;
 
       if (!userId) {
@@ -90,13 +91,16 @@ export default async function handler(req, res) {
 
       try {
         let bills;
+        const yearFilter = year ? { month: { $regex: `-${year}$` } } : {};
 
-        if (year) {
-          const yearFilter = { month: { $regex: `-${year}$` } };
-          bills = await Bill.find({ userId, roomId, ...yearFilter }).sort({ createdAt: 'desc' });
+        if (userRole === 'admin') {
+          // Nếu là admin, lấy tất cả hóa đơn
+          bills = await Bill.find({ roomId, ...yearFilter }).sort({ createdAt: 'desc' });
         } else {
-          bills = await Bill.find({ userId, roomId }).sort({ createdAt: 'desc' });
+          // Nếu không phải admin, chỉ lấy hóa đơn của user đó
+          bills = await Bill.find({ userId, roomId, ...yearFilter }).sort({ createdAt: 'desc' });
         }
+
         return res.status(200).json(bills);
       } catch (error) {
         return res.status(500).json({ message: error.message });

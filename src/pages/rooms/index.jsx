@@ -8,11 +8,35 @@ import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import axios from 'axios';
 import { getServerSideProps } from '@/helpers/cookieHelper';
+import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 
 function index({ token }) {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [roomList, setRoomList] = useState([]);
     const [editingRoom, setEditingRoom] = useState(null);
+    const [userId, setUserId] = useState(undefined);
+    const [user, setUser] = useState([]);
+
+    useEffect(() => {
+        if (token) {
+            const useridfromtoken = getUserIdFromToken(token);
+            if (useridfromtoken) {
+                setUserId(useridfromtoken);
+            }
+        }
+    }, [token])
+
+    useEffect(() => {
+        if(userId){
+            const fetchUser = async () => {
+                const response = await axios.get(`../api/users/${userId}`,{
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                setUser(response.data)
+            };
+            fetchUser();
+        }
+    },[userId])
 
     const fetchRooms = async () => {
         const response = await axios.get(`/api/rooms`,{
@@ -25,7 +49,6 @@ function index({ token }) {
     }, []);
 
     const handleSave = async (roomData) => {
-        console.log("edit",editingRoom)
         if (editingRoom) {
             // Call API to update room in database
             try {
@@ -146,6 +169,7 @@ function index({ token }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                     {roomList.map((room, index) => (
                         <RoomCard
+                            user={user}
                             key={index}
                             room={room}
                             onEdit={() => handleEdit(room)}

@@ -14,13 +14,20 @@ export default async function handler(req, res) {
   authenticate(req, res, async () => {
     const { id } = req.query;
     const userId = req.user;
+    const userRole = req.userRole;
     if (!userId) {
       return res.status(400).json({ message: 'Thiếu thông tin userId' });
     }
 
     if (req.method === 'GET') {
       try {
-        const room = await Room.findOne({ _id: id, userId: userId });
+        let room;
+        if (userRole === 'admin') {
+          room = await Room.findOne({ _id: id });
+        } else {
+          room = await Room.findOne({ _id: id, userId: userId });
+        }
+        
         if (!room) return res.status(404).json({ message: 'Phòng không tồn tại hoặc không thuộc về người dùng này' });
         return res.status(200).json(room);
       } catch (error) {

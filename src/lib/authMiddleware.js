@@ -19,6 +19,7 @@ export const authenticate = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded.userId;
+        req.userRole = decoded.role
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Token không hợp lệ' });

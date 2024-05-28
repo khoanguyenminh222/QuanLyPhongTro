@@ -12,8 +12,18 @@ export default async function handler(req, res) {
     await connectToDatabase();
     authenticate(req, res, async () => {
         if (req.method === 'GET') {
+            const userId = req.user;
+            const userRole = req.userRole;
+            if (!userId) {
+                return res.status(400).json({ message: 'Thiếu thông tin userId' });
+            }
             try {
-                const bills = await Bill.find({}, 'month'); // Lấy toàn bộ các bản ghi và chỉ lấy trường month
+                let bills
+                if (userRole === 'admin') {
+                    bills = await Bill.find({}, 'month');
+                } else {
+                    bills = await Bill.find({ userId }, 'month');
+                }
                 const uniqueYears = new Set(); // Sử dụng Set để lưu trữ các năm duy nhất
                 bills.forEach(bill => {
                     const year = parseInt(bill.month.split('-')[2]); // Tách năm từ chuỗi month và chuyển đổi thành số nguyên

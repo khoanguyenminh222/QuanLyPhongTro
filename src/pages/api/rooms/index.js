@@ -14,12 +14,18 @@ export default async function handler(req, res) {
   authenticate(req, res, async () => {
     if (req.method === 'GET') {
       const userId = req.user;
+      const userRole = req.userRole;
       if (!userId) {
         return res.status(400).json({ message: 'Thiếu thông tin userId' });
       }
 
       try {
-        const rooms = await Room.find({ userId: userId });
+        let rooms;
+        if (userRole === 'admin') {
+          rooms = await Room.find().populate("userId"); // Nếu là admin, lấy tất cả phòng
+        } else {
+          rooms = await Room.find({ userId }); // Nếu là user, chỉ lấy phòng của user đó
+        }
         return res.status(200).json(rooms);
       } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -34,7 +40,7 @@ export default async function handler(req, res) {
       }
 
       // Kiểm tra xem tên phòng đã tồn tại trong cơ sở dữ liệu chưa
-      const existingRoom = await Room.findOne({ name });
+      const existingRoom = await Room.findOne({ name, userId });
       if (existingRoom) {
         return res.status(400).json({ message: 'Tên phòng đã tồn tại' });
       }

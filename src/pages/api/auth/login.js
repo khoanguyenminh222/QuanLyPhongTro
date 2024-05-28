@@ -26,7 +26,7 @@ export default async function handler(req, res) {
                 return res.status(400).json({ message: 'Tên người dùng hoặc mật khẩu không đúng' });
             }
 
-            const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '24h' });
+            const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
             return res.status(200).json({ message: 'Đăng nhập thành công', token });
         } catch (error) {
             return res.status(500).json({ message: error.message });

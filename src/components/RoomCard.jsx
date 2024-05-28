@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faToggleOff, faToggleOn } from '@fortawesome/free-solid-svg-icons';
 
-function RoomCard({ room, onEdit, onDelete, onEditStatus }) {
+function RoomCard({ user, room, onEdit, onDelete, onEditStatus }) {
   const formatNumber = (number) => {
     return new Intl.NumberFormat('vi-VN').format(number);
   };
@@ -12,6 +12,7 @@ function RoomCard({ room, onEdit, onDelete, onEditStatus }) {
       <button onClick={onEditStatus} className="ml-2 text-blue-500 hover:underline focus:outline-none absolute top-4 right-4">
         {room.status == false ? <FontAwesomeIcon className='text-black' fontSize={30} icon={faToggleOff} /> : <FontAwesomeIcon className='text-green-500' fontSize={30} icon={faToggleOn} />}
       </button>
+      {user.role == "admin" && <p>{room.userId.fullname}</p>}
       <h2 className="text-xl font-bold mb-2 capitalize">Phòng {room.name}</h2>
       <p className="mb-2">Trạng thái: {room.status == false ? <span className='text-red-500'>Đang trống</span> : <span className='text-green-500'>Đang thuê</span>}  </p>
       <p className="mb-2">Tiền phòng: <span className="font-bold text-green-800">{formatNumber(room.rent).toLocaleString()} VND</span></p>
