@@ -56,10 +56,9 @@ const TenantModal = ({ show, onClose, onSave, tenantData }) => {
                     <div>
                         <label htmlFor="gender" className="block mb-1">Giới tính</label>
                         <select id="gender" name="gender" value={tenant.gender} onChange={handleInputChange} className="border p-2 rounded w-full">
-                            <option value="">Chọn giới tính</option>
+                            <option value="Other">Khác</option>
                             <option value="Male">Nam</option>
                             <option value="Female">Nữ</option>
-                            <option value="Other">Khác</option>
                         </select>
                     </div>
                     <div>

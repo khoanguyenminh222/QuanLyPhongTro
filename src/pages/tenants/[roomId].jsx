@@ -19,6 +19,23 @@ function TenantPage({ token }) {
     const [editingTenant, setEditingTenant] = useState(null);
 
     useEffect(() => {
+        const checkConfig = async () => {
+            // Kiểm tra cấu hình của người dùng
+            const res = await axios.get('/api/config/check', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (res.configured) {
+                router.push('/rooms'); // Chuyển hướng đến trang danh sách phòng
+            } else {
+                router.push('/settings'); // Chuyển hướng đến trang cấu hình
+            }
+        }
+        checkConfig();
+    }, [])
+
+    useEffect(() => {
         if (roomId) {
             fetchTenants();
             fetchRoom();
@@ -160,7 +177,7 @@ function TenantPage({ token }) {
                                 <tr key={tenant._id}>
                                     <td className="px-6 py-4 whitespace-nowrap">{tenant.name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{formatDate(tenant.dob)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{tenant.gender=="Male" ? "Name" : tenant.gender=="Female" ? "Nữ" : "Khác"}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{tenant.gender == "Male" ? "Nam" : tenant.gender == "Female" ? "Nữ" : "Khác"}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{tenant.healthInsuranceId}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{tenant.currentAddress}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{tenant.idCardNumber}</td>
@@ -178,7 +195,7 @@ function TenantPage({ token }) {
 
             <TenantModal
                 show={modalVisible}
-                onClose={() => setModalVisible(false)}
+                onClose={() => { setModalVisible(false); setEditingTenant(null) }}
                 onSave={handleSaveTenant}
                 tenantData={editingTenant}
             />

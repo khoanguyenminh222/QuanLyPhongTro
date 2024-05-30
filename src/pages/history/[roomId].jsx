@@ -16,6 +16,23 @@ function historyPage({ token }) {
     const [years, setYears] = useState([]);
     const [selectedYear, setSelectedYear] = useState('');
 
+    useEffect(() => {
+        const checkConfig = async () => {
+            // Kiểm tra cấu hình của người dùng
+            const res = await axios.get('/api/config/check', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (res.configured) {
+                router.push('/rooms'); // Chuyển hướng đến trang danh sách phòng
+            } else {
+                router.push('/settings'); // Chuyển hướng đến trang cấu hình
+            }
+        }
+        checkConfig();
+    }, [])
+
     const formatNumber = (number) => {
         return new Intl.NumberFormat('vi-VN').format(number);
     };

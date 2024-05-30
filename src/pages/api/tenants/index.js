@@ -1,6 +1,7 @@
 import connectToDatabase from '../../../lib/db';
 import Tenant from '../../../models/Tenant';
 import { authenticate } from '../../../lib/authMiddleware';
+import Room from '@/models/Room';
 
 export default async function handler(req, res) {
     await connectToDatabase();
@@ -17,8 +18,19 @@ export default async function handler(req, res) {
               }
       
               try {
+                // Check if the room exists and if the userId matches
+                const room = await Room.findById(roomId);
+
+                if (!room) {
+                    return res.status(404).json({ message: 'Phòng không tồn tại' });
+                }
+
+                if (room.userId.toString() !== userId.toString()) {
+                    return res.status(403).json({ message: 'Bạn không có quyền thêm người cho phòng này' });
+                }
+
                 const newTenant = new Tenant({
-                  name, dob, gender, healthInsuranceId, currentAddress, idCardNumber, phoneNumber, roomId, userId,
+                  name, dob, gender: gender ? gender : 'Other', healthInsuranceId, currentAddress, idCardNumber, phoneNumber, roomId, userId,
                 });
                 const savedTenant = await newTenant.save();
                 res.status(201).json(savedTenant);

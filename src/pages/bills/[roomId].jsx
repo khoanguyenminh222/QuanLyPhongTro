@@ -22,6 +22,23 @@ function BillPage({ token }) {
   const [maxWater, setMaxWater] = useState(9999);
   const [viewHistory, setViewHistory] = useState(false);
 
+  useEffect(() => {
+    const checkConfig = async () => {
+      // Kiểm tra cấu hình của người dùng
+      const res = await axios.get('/api/config/check', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.configured) {
+        router.push('/rooms'); // Chuyển hướng đến trang danh sách phòng
+      } else {
+        router.push('/settings'); // Chuyển hướng đến trang cấu hình
+      }
+    }
+    checkConfig();
+  }, [])
+
   const formatNumber = (number) => {
     return new Intl.NumberFormat('vi-VN').format(number);
   };
@@ -112,7 +129,7 @@ function BillPage({ token }) {
         waterRate: room.waterRate,
         otherCosts: room.otherCosts,
         rent: room.rent,
-      },{
+      }, {
         headers: {
           Authorization: `Bearer ${token}`
         }

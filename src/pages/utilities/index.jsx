@@ -4,10 +4,29 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Header from '@/components/Header';
 import { getServerSideProps } from '@/helpers/cookieHelper';
+import { useRouter } from 'next/router';
 
 function UtilitiesPage({ token }) {
+  const router = useRouter();
   const [maxElectricity, setMaxElectricity] = useState('');
   const [maxWater, setMaxWater] = useState('');
+
+  useEffect(() => {
+    const checkConfig = async () => {
+      // Kiểm tra cấu hình của người dùng
+      const res = await axios.get('/api/config/check', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.configured) {
+        router.push('/rooms'); // Chuyển hướng đến trang danh sách phòng
+      } else {
+        router.push('/settings'); // Chuyển hướng đến trang cấu hình
+      }
+    }
+    checkConfig();
+  }, [])
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -33,11 +52,20 @@ function UtilitiesPage({ token }) {
           Authorization: `Bearer ${token}`
         }
       });
-      toast.success(response.data.message);
+      if (response.status >= 200 && response.status < 300) {
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message)
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      if (error.response) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message);
+      }
     }
   };
+
   return (
     <>
       <Header token={token} />

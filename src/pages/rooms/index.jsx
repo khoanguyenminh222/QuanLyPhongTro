@@ -9,13 +9,32 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 import axios from 'axios';
 import { getServerSideProps } from '@/helpers/cookieHelper';
 import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
+import { useRouter } from 'next/router';
 
 function index({ token }) {
+    const router = useRouter();
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [roomList, setRoomList] = useState([]);
     const [editingRoom, setEditingRoom] = useState(null);
     const [userId, setUserId] = useState(undefined);
     const [user, setUser] = useState([]);
+
+    useEffect(() => {
+        const checkConfig = async () => {
+            // Kiểm tra cấu hình của người dùng
+            const res = await axios.get('/api/config/check', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (res.configured) {
+                router.push('/rooms'); // Chuyển hướng đến trang danh sách phòng
+            } else {
+                router.push('/settings'); // Chuyển hướng đến trang cấu hình
+            }
+        }
+        checkConfig();
+    }, [])
 
     useEffect(() => {
         if (token) {
@@ -27,19 +46,19 @@ function index({ token }) {
     }, [token])
 
     useEffect(() => {
-        if(userId){
+        if (userId) {
             const fetchUser = async () => {
-                const response = await axios.get(`../api/users/${userId}`,{
+                const response = await axios.get(`../api/users/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 setUser(response.data)
             };
             fetchUser();
         }
-    },[userId])
+    }, [userId])
 
     const fetchRooms = async () => {
-        const response = await axios.get(`/api/rooms`,{
+        const response = await axios.get(`/api/rooms`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         setRoomList(response.data)
@@ -109,7 +128,7 @@ function index({ token }) {
                     onClick: async () => {
                         // Call API to delete room from database
                         try {
-                            const response = await axios.delete(`/api/rooms/${roomId}`,{
+                            const response = await axios.delete(`/api/rooms/${roomId}`, {
                                 headers: { Authorization: `Bearer ${token}` }
                             });
                             if (response.status >= 200 && response.status < 300) {
@@ -137,7 +156,7 @@ function index({ token }) {
 
     const handleEditStatus = async (room) => {
         try {
-            const response = await axios.put(`/api/rooms/${room._id}`, { status: !room.status },{
+            const response = await axios.put(`/api/rooms/${room._id}`, { status: !room.status }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status >= 200 && response.status < 300) {
@@ -157,7 +176,7 @@ function index({ token }) {
 
     return (
         <>
-            <Header token={token}/>
+            <Header token={token} />
             <div className="container mx-auto px-4">
                 <h1 className="text-3xl font-bold mt-8 mb-4">Danh sách Phòng trọ</h1>
                 <button

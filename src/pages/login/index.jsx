@@ -38,8 +38,19 @@ export default function LoginPage() {
                 const expirationDate = new Date();
                 expirationDate.setTime(expirationDate.getTime() + 24 * 60 * 60 * 1000); // 24 hours in milliseconds
                 Cookies.set('token', token, { expires: expirationDate, secure: true });
-                router.push('/rooms'); // Chuyển hướng đến trang dashboard sau khi đăng nhập thành công
-                toast.success(response.data.message)
+                toast.success(response.data.message);
+
+                // Kiểm tra cấu hình của người dùng
+                const res = await axios.get('/api/config/check', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                if (res.configured) {
+                    router.push('/rooms'); // Chuyển hướng đến trang danh sách phòng
+                } else {
+                    router.push('/settings'); // Chuyển hướng đến trang cấu hình
+                }
             } else {
                 toast.error(response.data.message)
             }
