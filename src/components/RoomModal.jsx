@@ -10,11 +10,21 @@ Modal.setAppElement('#__next');
 function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
     const [name, setName] = useState('');
     const [rent, setRent] = useState('');
+    const [rentFormatted, setRentFormatted] = useState('');
     const [electricityRate, setElectricityRate] = useState('');
+    const [electricityRateFormatted, setElectricityRateFormatted] = useState('');
     const [waterRate, setWaterRate] = useState('');
+    const [waterRateFormatted, setWaterRateFormatted] = useState('');
     const [otherCosts, setOtherCosts] = useState([]);
     const [electricity, setElectricity] = useState('');
     const [water, setWater] = useState('');
+
+    const formatNumberForEdit = (rent) => {
+        // Ensure rent is a string before formatting
+        const rentValue = rent !== undefined ? String(rent) : '';
+        // Format currency value for rent
+        return formatCurrency(rentValue);
+    };
 
     useEffect(() => {
         if (initialData) {
@@ -25,6 +35,10 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
             setOtherCosts(initialData.otherCosts || []);
             setElectricity(initialData.electricity || '');
             setWater(initialData.water || '');
+
+            setRentFormatted(formatNumberForEdit(initialData.rent));
+            setElectricityRateFormatted(formatNumberForEdit(initialData.electricityRate));
+            setWaterRateFormatted(formatNumberForEdit(initialData.waterRate));
         }
     }, [initialData]);
 
@@ -60,6 +74,57 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
         onSave({ name, rent, electricityRate, waterRate, otherCosts, electricity, water });
     };
 
+    const formatCurrency = (value) => {
+        // Remove any existing dots
+        const cleanValue = value.replace(/\./g, '');
+
+        // Add dots for thousands separator
+        const formattedValue = cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return formattedValue;
+    };
+
+    const handleChangeRentFormatted = (e) => {
+        // Get raw input value
+        const rawValue = e.target.value;
+
+        // Remove non-digit characters from input value
+        const cleanedValue = rawValue.replace(/[^\d]/g, '');
+
+        // Format currency value
+        const formattedRent = formatCurrency(cleanedValue);
+        // Update state with both raw and formatted values
+        setRent(cleanedValue);
+        setRentFormatted(formattedRent);
+    };
+
+    const handleChangeElectricityRateFormatted = (e) => {
+        // Get raw input value
+        const rawValue = e.target.value;
+
+        // Remove non-digit characters from input value
+        const cleanedValue = rawValue.replace(/[^\d]/g, '');
+
+        // Format currency value
+        const formattedRent = formatCurrency(cleanedValue);
+        // Update state with both raw and formatted values
+        setElectricityRate(cleanedValue);
+        setElectricityRateFormatted(formattedRent);
+    };
+
+    const handleChangeWaterRateFormatted = (e) => {
+        // Get raw input value
+        const rawValue = e.target.value;
+
+        // Remove non-digit characters from input value
+        const cleanedValue = rawValue.replace(/[^\d]/g, '');
+
+        // Format currency value
+        const formattedRent = formatCurrency(cleanedValue);
+        // Update state with both raw and formatted values
+        setWaterRate(cleanedValue);
+        setWaterRateFormatted(formattedRent);
+    };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -81,27 +146,27 @@ function RoomModal({ isOpen, onRequestClose, onSave, initialData = {} }) {
             <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Tiền Phòng (VND)</label>
                 <input
-                    type="number"
-                    value={rent}
-                    onChange={(e) => setRent(e.target.value)}
+                    type="text"
+                    value={rentFormatted}
+                    onChange={handleChangeRentFormatted}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
             </div>
             <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Tiền Điện (VND/kWh)</label>
                 <input
-                    type="number"
-                    value={electricityRate}
-                    onChange={(e) => setElectricityRate(e.target.value)}
+                    type="text"
+                    value={electricityRateFormatted}
+                    onChange={handleChangeElectricityRateFormatted}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
             </div>
             <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Tiền Nước (VND/m³)</label>
                 <input
-                    type="number"
-                    value={waterRate}
-                    onChange={(e) => setWaterRate(e.target.value)}
+                    type="text"
+                    value={waterRateFormatted}
+                    onChange={handleChangeWaterRateFormatted}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
             </div>

@@ -161,7 +161,8 @@ function BillPage({ token }) {
           </Link>
           <h1 className="text-3xl font-bold mt-8 mb-4">Tạo Hóa đơn cho Phòng #{room.name}</h1>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="electricity">Số điện (kWh) - trên đồng hồ điện</label>
+            <label className="block text-gray-700 text-sm font-bold" htmlFor="electricity">Số điện (kWh) - trên đồng hồ điện</label>
+            <p className='text-sm text-inherit mb-2 italic'>Trước đó: {room.electricity}</p>
             <input
               type="number"
               id="electricity"
@@ -171,7 +172,8 @@ function BillPage({ token }) {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="water">Số nước (m³) - trên đồng hồ nước</label>
+            <label className="block text-gray-700 text-sm font-bold" htmlFor="water">Số nước (m³) - trên đồng hồ nước</label>
+            <p className='text-sm text-inherit mb-2 italic'>Trước đó: {room.water}</p>
             <input
               type="number"
               id="water"
