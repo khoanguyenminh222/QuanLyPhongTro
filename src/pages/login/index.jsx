@@ -46,7 +46,8 @@ export default function LoginPage() {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                if (res.configured) {
+                console.log(res.data)
+                if (res.data.configured) {
                     router.push('/rooms'); // Chuyển hướng đến trang danh sách phòng
                 } else {
                     router.push('/settings'); // Chuyển hướng đến trang cấu hình

@@ -24,7 +24,7 @@ function historyPage({ token }) {
                     Authorization: `Bearer ${token}`
                 }
             });
-            if (res.configured) {
+            if (res.data.configured) {
                 router.push('/rooms'); // Chuyển hướng đến trang danh sách phòng
             } else {
                 router.push('/settings'); // Chuyển hướng đến trang cấu hình
