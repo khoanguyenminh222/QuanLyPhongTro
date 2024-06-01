@@ -75,14 +75,14 @@ const BillDetailModal = ({ token, bill, onClose }) => {
                     </div>
                     <div className="mb-4">
                         {bill.currentElectricity < bill.previousElectricity ?
-                            <p>Điện: ({formatNumber(maxElectricity)} - {formatNumber(bill.previousElectricity)} + 1 + {formatNumber(bill.currentElectricity)}) * {formatNumber(bill.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
+                            <p>Điện: {formatNumber(bill.currentElectricity)} . {maxElectricity-bill.previousElectricity+1+bill.currentElectricity} kí * {formatNumber(bill.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
                             :
-                            <p>Điện: ({formatNumber(bill.currentElectricity)} - {formatNumber(bill.previousElectricity)}) * {formatNumber(bill.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
+                            <p>Điện: {formatNumber(bill.previousElectricity)} . {bill.currentElectricity-bill.previousElectricity} kí * {formatNumber(bill.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
                         }
                         {bill.currentWater < bill.previousWater ?
-                            <p>Nước: ({formatNumber(maxWater)} - {formatNumber(bill.previousWater)} + 1 + {formatNumber(bill.currentWater)}) * {formatNumber(bill.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+                            <p>Nước: {formatNumber(bill.currentWater)} . {maxWater-bill.previousWater+1+bill.currentWater} khối * {formatNumber(bill.waterRate)} đ = {formatNumber(waterCost)} đ</p>
                             :
-                            <p>Nước: ({formatNumber(bill.currentWater)} - {formatNumber(bill.previousWater)}) * {formatNumber(bill.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+                            <p>Nước: {formatNumber(bill.previousWater)} . {bill.currentWater-bill.previousWater} khối * {formatNumber(bill.waterRate)} đ = {formatNumber(waterCost)} đ</p>
                         }
                         {Array.isArray(bill.otherCosts) && bill.otherCosts.length > 0 && (
                             <div className="mb-2">

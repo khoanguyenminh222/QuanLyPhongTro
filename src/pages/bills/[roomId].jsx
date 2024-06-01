@@ -207,14 +207,14 @@ function BillPage({ token }) {
               </div>
               <div className="mb-4">
                 {electricityCurrent < room.electricity ?
-                  <p>Điện: ({formatNumber(maxElectricity)} - {formatNumber(room.electricity)} + 1 + {formatNumber(electricityCurrent)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
+                  <p>Điện: {formatNumber(electricityCurrent)} . {maxElectricity-room.electricity+1+electricityCurrent} kí * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
                   :
-                  <p>Điện: ({formatNumber(electricityCurrent)} - {formatNumber(room.electricity)}) * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
+                  <p>Điện: {formatNumber(electricityCurrent)} . {electricityCurrent-room.electricity} kí * {formatNumber(room.electricityRate)} đ = {formatNumber(electricityCost)} đ</p>
                 }
                 {waterCurrent < room.water ?
-                  <p>Nước: ({formatNumber(maxWater)} - {formatNumber(room.water)} + 1 + {formatNumber(waterCurrent)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+                  <p>Nước: {formatNumber(waterCurrent)} . {maxWater-room.water+1+waterCurrent} khối  * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
                   :
-                  <p>Nước: ({formatNumber(waterCurrent)} - {formatNumber(room.water)}) * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
+                  <p>Nước: {formatNumber(waterCurrent)} . {waterCurrent-room.water} khối * {formatNumber(room.waterRate)} đ = {formatNumber(waterCost)} đ</p>
                 }
                 {Array.isArray(room.otherCosts) && room.otherCosts.length > 0 && (
                   <div className="mb-2">
